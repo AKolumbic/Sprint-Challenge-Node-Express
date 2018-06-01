@@ -117,7 +117,65 @@ server.get('/api/actions/', (req, res) => {
 })
 server.get('/api/actions/:id', (req, res) => {
     actions
-    .get()
+    .get(req.params.id)
+    .then(response => {
+        if (!response) {
+            res.status(404).json({ errorMessage: 'This Does not Exist' })
+        } else {
+            res.status(200).json(response)
+        }
+    })
+    .catch(error => {
+        res.status(500).json({ error: 'This Could Not Be Retrieved' })
+    })
+})
+server.post('/api/actions/', (req, res) => {
+    const { description } = req.body;
+    if ( description ) {
+        actions
+        .insert({ description })
+        .then(response => {
+            res.status(201).json({ id: response.id, description })
+        })
+        .catch(error => {
+            res.status(500).json({ errorMessage: "There was an Error" })
+        })
+    } else {
+        res.status(400).json({ errorMessage: "please provide a description"})
+    }
+})
+server.delete('/api/actions/:id', (req, res) => {
+    actions
+    .remove(req.params.id)
+    .then(response => {
+        if(response === 1) {
+        res.status(200).json({ message: "Delete Success" })
+        } else {
+            res.status(404).json({ errorMessage: "that doesn't exist" })
+        }
+    })
+    .catch(error => {
+        res.status(500).json({ errorMessage: "Delete Failed"})
+    })
+})
+server.put('/api/actions/:id', (req, res) => {
+    const { description } = req.body;
+    if ( description ) {
+        actions
+        .update(req.params.id, { description })
+        .then(response => {
+            if (response === 1) {
+            res.status(200).json({ id: response.id, description })
+            } else {
+                res.status(404).json({ errorMessage: "That doesnt exist" })
+            }
+        })
+        .catch(error => {
+            res.status(500).json({ errorMessage: "could not be updated"})
+        })
+    } else {
+        res.status(400).json({ errorMessage: "please provide a description"})
+    }
 })
 
 
